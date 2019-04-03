@@ -98,10 +98,10 @@ export default class Circuit  {
             console.warn("inputLeadIndex out of bounds");
             return false;
         } else if (outputFrom.component.outputs[outputLeadIndex].connected) {
-            console.warn("Selected output lead already connected");
+            console.warn("Selected output lead of " + outputFrom.component.uid + " already connected");
             return false;
         } else if (inputTo.component.inputs[inputLeadIndex].connected) {
-            console.warn("Selected input lead already connected");
+            console.warn("Selected input lead of " + inputTo.component.uid + " already connected");
             return false;
         } else {
             
@@ -154,7 +154,31 @@ export default class Circuit  {
     }
 
     breadthFirstTraverse(startingNode: CircuitNode, traversalFn: (currentNode: CircuitNode) => void): void {
+        let nodeQueue = [startingNode];
+        let visited = {};
 
+        while (nodeQueue.length > 0) {
+
+            let currentNode = nodeQueue[0];
+
+            console.log(currentNode);
+
+            let hasChildren = false;
+
+            if (currentNode.outputConnections.length > 0) {
+                for (let i = 0; i < currentNode.outputConnections.length; i++) {
+                    if (typeof visited[currentNode.outputConnections[i].inputToNode.component.uid] === "undefined") {
+                        nodeQueue.push(currentNode.outputConnections[i].inputToNode);
+                        traversalFn(currentNode.outputConnections[i].inputToNode);
+                        visited[currentNode.outputConnections[i].inputToNode.component.uid]  = true;
+                        hasChildren = true;
+                        break;
+                    }
+                }   
+            }
+
+            nodeQueue.shift();
+        }
     }
 
     depthFirstTraverse(startingNode: CircuitNode, traversalFn: (currentNode: CircuitNode) => void): void {
