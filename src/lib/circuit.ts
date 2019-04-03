@@ -27,11 +27,19 @@ export default class Circuit  {
     private components: Map<string, CircuitNode>;
     private connections: Map<string, CircuitConnection>;
 
+    //list of nodes that will be starting points for circuit traversal. Physically equates to active components.
+    private sources: Array<CircuitNode>;
+
     constructor(display: Display) {
         this.display = display;
         this.components = new Map<string, CircuitNode>();
         this.componentTypeCounts = new Map<string, number>();
         this.connections = new Map<string, CircuitConnection>();
+        this.sources = [];
+    }
+
+    addSource(node: CircuitNode): void {
+        this.sources.push(node);
     }
 
     addComponent(component: IElectronic): string {
@@ -108,8 +116,11 @@ export default class Circuit  {
             connection.inputLeadIndex = inputLeadIndex;
             connection.outputFromNode = outputFrom;
             connection.outputLeadIndex = outputLeadIndex;
-
+            
             connection.wire = new Wire(outputFrom.component.outputs[outputLeadIndex].position, inputTo.component.inputs[inputLeadIndex].position);
+
+            inputTo.inputConnections.push(connection);
+            outputFrom.outputConnections.push(connection);
 
             this.display.addElement(connection.wire);
 
@@ -140,5 +151,48 @@ export default class Circuit  {
             console.warn("Connection between " + nodeA.component.uid + " and " + nodeB.component.uid + " does not exist");
             return false;
         }
+    }
+
+    breadthFirstTraverse(startingNode: CircuitNode, traversalFn: (currentNode: CircuitNode) => void): void {
+
+    }
+
+    depthFirstTraverse(startingNode: CircuitNode, traversalFn: (currentNode: CircuitNode) => void): void {
+        let nodeStack = [startingNode];
+        let visited = {};
+
+        while (nodeStack.length > 0) {
+            let currentNode = nodeStack[nodeStack.length - 1];
+
+            let hasChildren = false;
+
+            if (currentNode.outputConnections.length > 0) {
+                for (let i = 0; i < currentNode.outputConnections.length; i++) {
+                    if (typeof visited[currentNode.outputConnections[i].inputToNode.component.uid] === "undefined") {
+                        nodeStack.push(currentNode.outputConnections[i].inputToNode);
+                        traversalFn(currentNode.outputConnections[i].inputToNode);
+                        visited[currentNode.outputConnections[i].inputToNode.component.uid]  = true;
+                        hasChildren = true;
+                        break;
+                    }
+                }   
+            }
+
+            if (!hasChildren) {
+                nodeStack.pop();
+            }
+        }
+    }
+
+    isPartOfLoop(startingNode: CircuitNode): boolean {
+        const startingId = startingNode.component.uid;
+        let isPartOf = false;
+        this.depthFirstTraverse(startingNode, (node) => {
+            if (node.component.uid === startingId) {
+                isPartOf = true;
+            }
+        })
+
+        return isPartOf;
     }
 }

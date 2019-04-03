@@ -15,9 +15,13 @@ const circuit = new Circuit(display);
 
 let battery = new Battery(new Vector(50, 50));
 
+let wire = new Wire(battery.input.position, battery.position);
+
 let led = new LED("#4fe24d", new Vector(150, 150));
 let led2 = new LED("#4fe24d", new Vector(250, 300));
 let led3 = new LED("#4fe24d", new Vector(450, 450));
+
+display.addElement(wire);
 
 circuit.addComponent(battery);
 circuit.addComponent(led);
@@ -29,18 +33,19 @@ let node1 = circuit.getNode(led.uid);
 let node2 = circuit.getNode(led2.uid);
 let node3 = circuit.getNode(led3.uid);
 
-console.log(node1, node2, node3);
-
 circuit.connectSimple(bNode, node1);
 circuit.connectSimple(node1, node2);
 circuit.connectSimple(node2, node3);
 circuit.connectSimple(node3, node1);
 circuit.connectSimple(node3, bNode);
 
+console.log(circuit.isPartOfLoop(bNode));
+
 function loop() {
     requestAnimationFrame(loop);
     display.clear();
     display.render();
+    wire.positionB = input.mousePos;
 }
     
 loop();
