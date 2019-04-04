@@ -27,7 +27,6 @@ export default class LED extends Simple implements IDrawable, IGeometric {
     draw(context: CanvasRenderingContext2D) {
         context.beginPath();
         if (this.input.on) {
-            console.log("Setting fill path to: " + this.color);
             context.fillStyle = this.color;
         }
         context.arc(this.position.x, this.position.y, this.width / 2, 0, 2 * Math.PI);

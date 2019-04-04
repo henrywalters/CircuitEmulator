@@ -3,6 +3,8 @@ import Vector from "./vector";
 import IElectronic from "./interface/iElectronic";
 import Wire from "./components/wire";
 import Display from "./display";
+import Input from "./input";
+import { Lead } from "./lead";
 
 export class CircuitConnection {
     inputToNode: CircuitNode;
@@ -19,27 +21,111 @@ export class CircuitNode {
     inputConnections: Array<CircuitConnection>
 }
 
+enum UserStates {
+    None,
+    InputSelected,
+    OutputSelected,
+}
+
 export default class Circuit  {
 
     display: Display;
+    input: Input;
 
     private componentTypeCounts: Map<string, number>;
     private components: Map<string, CircuitNode>;
     private connections: Map<string, CircuitConnection>;
 
-    //list of nodes that will be starting points for circuit traversal. Physically equates to active components.
-    private sources: Array<CircuitNode>;
+    private leads: Array<Lead>;
 
-    constructor(display: Display) {
+    private source: CircuitNode;
+
+    private userState: UserStates = UserStates.None;
+
+    private selectedLead: Lead = null;
+    private selectedNode: CircuitNode = null;
+
+    constructor(display: Display, input: Input) {
+        this.source = null;
+        this.input = input;
         this.display = display;
+        this.leads = [];
         this.components = new Map<string, CircuitNode>();
         this.componentTypeCounts = new Map<string, number>();
         this.connections = new Map<string, CircuitConnection>();
-        this.sources = [];
     }
 
-    addSource(node: CircuitNode): void {
-        this.sources.push(node);
+    setSource(node: CircuitNode): void {
+        if (this.isPartOfLoop(node)) {
+            this.source = node;
+        } else {
+            throw new Error("Node " + node.component.uid + " is not part of a valid loop and can therefore not be made the circuit source");
+        }
+    }
+
+    checkForLeadClicks() {
+        this.leads.forEach(lead => {
+            if (lead.containsPoint(this.input.mousePos)) {
+                lead.onClickFn(this.input.mousePos);
+            }
+        })
+    }
+
+    loop(): void {
+        if (this.source !== null) {
+            this.breadthFirstTraverse(this.source, (node) => {
+                node.outputConnections.forEach(output => {
+                    output.inputToNode.component.inputs[output.inputLeadIndex].on = node.component.outputs[output.outputLeadIndex].on;
+                    output.inputToNode.component.updateOutput();
+                });
+            })
+        } else {
+            throw new Error("Source must be set to loop. Try using a battery");
+        }
+    }
+
+    inLeadList(lead: Lead, leads: Lead[]): boolean {
+        let exists = false;
+        leads.forEach(l => {
+            console.log(l.uid, lead.uid);
+            if (l.uid === lead.uid) {
+                exists = true;
+            }
+        })
+        return exists;
+    }
+
+    leadIndex(lead: Lead): number {
+        return lead.uid.split("_")[3] as unknown as number;
+    }
+
+    leadClickFn(node: CircuitNode, lead: Lead): void {
+        
+        if (this.userState === UserStates.None) {
+            if (this.inLeadList(lead, node.component.inputs)) {
+                this.userState = UserStates.InputSelected;
+                this.selectedLead = lead;
+                this.selectedNode = node;
+            } else if (this.inLeadList(lead, node.component.outputs)) {
+                this.userState = UserStates.OutputSelected
+                this.selectedLead = lead;
+                this.selectedNode = node;
+            } else {
+                this.userState = UserStates.None;
+                console.warn("Didnt match a lead up");
+            }
+        } if (this.userState === UserStates.OutputSelected) {
+            if (this.inLeadList(lead, node.component.inputs)) {
+                if (!lead.connected) {
+                    this.connect(this.selectedNode, this.leadIndex(this.selectedLead), node, this.leadIndex(lead));
+                    this.userState = UserStates.None;
+                    this.selectedLead = null;
+                    this.selectedNode = null;
+                }
+            }
+        }
+
+        console.log(this.userState);
     }
 
     addComponent(component: IElectronic): string {
@@ -59,15 +145,29 @@ export default class Circuit  {
 
         if (IsDrawable(node.component)) {
             this.display.addElement(node.component);
-
-            node.component.inputs.forEach(input => {
-                this.display.addElement(input);
-            })
-
-            node.component.outputs.forEach(output => {
-                this.display.addElement(output);
-            })
         }
+
+        let inputIndex = 0;
+        node.component.inputs.forEach(input => {
+            if (IsDrawable(node.component)) {
+                this.display.addElement(input);
+            }
+            input.uid = node.component.uid + "_input_" + inputIndex; 
+            input.onClickFn = (mousePos: Vector) => { this.leadClickFn(node, input) };
+            this.leads.push(input);
+            inputIndex += 1;
+        })
+
+        let outputIndex = 0;
+        node.component.outputs.forEach(output => {
+            if (IsDrawable(node.component)) {
+                this.display.addElement(output);
+            }
+            output.uid = node.component.uid + "_output_" + outputIndex;
+            output.onClickFn = (mousePos: Vector) => { this.leadClickFn(node, output) };
+            this.leads.push(output);
+            outputIndex += 1;
+        })
 
         this.components.set(id, node);
 
@@ -157,26 +257,23 @@ export default class Circuit  {
         let nodeQueue = [startingNode];
         let visited = {};
 
-        while (nodeQueue.length > 0) {
+        let originNode = null;
 
+        while (nodeQueue.length > 0) {
             let currentNode = nodeQueue[0];
 
-            console.log(currentNode);
-
-            let hasChildren = false;
-
-            if (currentNode.outputConnections.length > 0) {
-                for (let i = 0; i < currentNode.outputConnections.length; i++) {
-                    if (typeof visited[currentNode.outputConnections[i].inputToNode.component.uid] === "undefined") {
-                        nodeQueue.push(currentNode.outputConnections[i].inputToNode);
-                        traversalFn(currentNode.outputConnections[i].inputToNode);
-                        visited[currentNode.outputConnections[i].inputToNode.component.uid]  = true;
-                        hasChildren = true;
-                        break;
-                    }
-                }   
+            if (originNode !== null) {
+                traversalFn(currentNode);
             }
 
+            originNode = currentNode;
+
+            for (let i = 0; i < currentNode.outputConnections.length; i++) {
+                if (typeof visited[currentNode.outputConnections[i].inputToNode.component.uid] === "undefined") {
+                    nodeQueue.push(currentNode.outputConnections[i].inputToNode);
+                    visited[currentNode.outputConnections[i].inputToNode.component.uid]  = true;
+                }
+            }   
             nodeQueue.shift();
         }
     }

@@ -28,4 +28,10 @@ export default class Demultiplexer extends BaseComponent implements IDrawable, I
         context.stroke();
     }
 
+    updateOutput(): void {
+        this.outputs.forEach(output => {
+            output.on = this.input(0).on;
+        })
+    }
+
 }

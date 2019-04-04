@@ -18,6 +18,8 @@ export class Lead implements IDrawable, IGeometric, IClickable {
     width: number = 15;
     height: number = 15;
     shape: Shape = Shape.Circle;
+
+    public uid: string = "";
     
     constructor(position: Vector) {
         this._position = position;
