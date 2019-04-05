@@ -5,6 +5,8 @@ import IGeometric, { Shape } from "../interface/IGeometric";
 
 export default class Battery extends Simple implements IDrawable, IGeometric {
 
+    name: string = "battery";
+
     visible: boolean = true;
     position: Vector;
 

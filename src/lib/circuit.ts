@@ -56,10 +56,11 @@ export default class Circuit  {
     }
 
     setSource(node: CircuitNode): void {
+        this.source = node;
         if (this.isPartOfLoop(node)) {
-            this.source = node;
+            
         } else {
-            throw new Error("Node " + node.component.uid + " is not part of a valid loop and can therefore not be made the circuit source");
+            //throw new Error("Node " + node.component.uid + " is not part of a valid loop and can therefore not be made the circuit source");
         }
     }
 
@@ -191,6 +192,7 @@ export default class Circuit  {
     }
 
     connect(outputFrom: CircuitNode, outputLeadIndex: number, inputTo: CircuitNode, inputLeadIndex: number): boolean {
+        console.log(outputFrom, inputTo);
         if (outputLeadIndex >= outputFrom.component.outputs.length) {
             console.warn("outputLeadIndex out of bounds");
             return false;

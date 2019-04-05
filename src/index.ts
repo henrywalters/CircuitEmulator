@@ -46,16 +46,16 @@ let node5 = circuit.getNode(led5.uid);
 let node6 = circuit.getNode(led6.uid);
 let dNode = circuit.getNode(demux.uid);
 
-circuit.connectSimple(bNode, dNode);
+//circuit.connectSimple(bNode, dNode);
 
 //circuit.connect(dNode, 0, node4, 0);
-circuit.connect(dNode, 1, node5, 0);
+//circuit.connect(dNode, 1, node5, 0);
 
-circuit.connectSimple(node5, node6);
+//circuit.connectSimple(node5, node6);
 
-circuit.connectSimple(node6, bNode);
+//circuit.connectSimple(node6, bNode);
 
-circuit.setSource(bNode);
+//
 
 display.addElement(fpsLabel);
 
@@ -64,6 +64,8 @@ let fpsSum = 0;
 let ticks = 0;
 
 let sampleSize = 50;
+
+circuit.setSource(bNode);
 
 input.mouseDown = _ => {
     circuit.checkForLeadClicks();
@@ -75,6 +77,8 @@ function loop() {
     display.clear();
 
     circuit.loop();
+
+    //
 
     display.render();
 
