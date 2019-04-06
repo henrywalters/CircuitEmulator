@@ -22,8 +22,8 @@ export default class Battery extends Simple implements IDrawable, IGeometric {
     constructor(position: Vector) {
         super();
         this.position = position;
-        this.input.position = this.position.add(new Vector(this.width / 2.0, 0));
-        this.output.position = this.position.add(new Vector(this.width / 2.0, this.height));
+        this.input.position = this.position.add(new Vector(this.width / 2.0, this.input.height / -2));
+        this.output.position = this.position.add(new Vector(this.width / 2.0, this.height + this.output.height / 2));
     }
 
     updateOutput(): void {

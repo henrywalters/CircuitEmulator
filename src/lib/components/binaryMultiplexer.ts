@@ -11,8 +11,8 @@ export default class BinaryMultiplexer implements IElectronic, IGeometric, IMove
     name: string = "binarymultiplexer";
     uid: string = "";
 
-    inputs: Array<Lead>;
-    outputs: Array<Lead>;
+    inputs: Array<Lead> = [];
+    outputs: Array<Lead> = [];
 
     position: Vector;
 
@@ -52,12 +52,12 @@ export default class BinaryMultiplexer implements IElectronic, IGeometric, IMove
     }
 
     move(delta: Vector): void {
-        this.position.add(delta);
+        this.position = this.position.add(delta);
         MoveLeadsRelativeToComponent(this, delta);
     }
 
     moveTo(position: Vector): void {
-        const delta = this.position.subtract(position);
+        const delta = position.subtract(this.position);
         this.move(delta);
     }
 }

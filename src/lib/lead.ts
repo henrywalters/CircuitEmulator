@@ -16,6 +16,8 @@ const LeadStateColors: string[] = [
     "#8e8e8e"
 ];
 
+export const LEAD_RADIUS = 7.5;
+
 export class Lead implements IDrawable, IGeometric, IClickable {
     private _position: Vector;
     private _on: boolean;
@@ -28,8 +30,8 @@ export class Lead implements IDrawable, IGeometric, IClickable {
 
     visible: boolean = true;
 
-    width: number = 15;
-    height: number = 15;
+    width: number = LEAD_RADIUS * 2;
+    height: number = LEAD_RADIUS * 2;
     shape: Shape = Shape.Circle;
 
     public uid: string = "";
@@ -44,7 +46,7 @@ export class Lead implements IDrawable, IGeometric, IClickable {
         this._offHook = () => {};
 
         this.onClickFn = (mousePos: Vector) => {
-            console.log(mousePos)
+            
         }
     }
 

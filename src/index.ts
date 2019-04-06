@@ -7,17 +7,20 @@ import Circuit from './lib/circuit';
 import Battery from './lib/components/battery';
 import Demultiplexer from './lib/components/demultiplexer';
 import Label from './lib/components/label';
+import Multiplexer from './lib/components/multiplexer';
+import And from './lib/components/gates/and';
 
 const app = document.getElementById("app");
 
-const display = new Display(app, 800, 800);
+const display = new Display(app, window.innerWidth, window.innerHeight);
 const input = new Input();
 
 const circuit = new Circuit(display, input);
 
-let battery = new Battery(new Vector(50, 50));
+let battery = new Battery(new Vector(20, 50));
 
-let demux = new Demultiplexer(50, 200, new Vector(150, 70), 6);
+let mux = new Multiplexer(20, 300, new Vector(display.width - 80, display.height - 340), 10);
+let demux = new Demultiplexer(20, 300, new Vector(20, display.height - 340), 10);
 
 let led = new LED("#4fe24d", new Vector(230, 150));
 let led2 = new LED("#4fe24d", new Vector(250, 300));
@@ -31,10 +34,17 @@ fpsLabel.text = "FPS: 0";
 
 circuit.addComponent(battery);
 circuit.addComponent(demux);
-//circuit.addComponent(led);
+circuit.addComponent(mux);
+circuit.addComponent(led);
+circuit.addComponent(led2);
+circuit.addComponent(led3);
 circuit.addComponent(led4);
 circuit.addComponent(led5);
 circuit.addComponent(led6);
+
+circuit.addComponent(new And(new Vector(100, 100)));
+circuit.addComponent(new And(new Vector(100, 100)));
+circuit.addComponent(new And(new Vector(100, 100)));
 
 let bNode = circuit.getNode(battery.uid);
 
@@ -45,8 +55,11 @@ let node4 = circuit.getNode(led4.uid);
 let node5 = circuit.getNode(led5.uid);
 let node6 = circuit.getNode(led6.uid);
 let dNode = circuit.getNode(demux.uid);
+let mNode = circuit.getNode(mux.uid);
 
-//circuit.connectSimple(bNode, dNode);
+circuit.connectSimple(mNode, bNode);
+
+circuit.connectSimple(bNode, dNode);
 
 //circuit.connect(dNode, 0, node4, 0);
 //circuit.connect(dNode, 1, node5, 0);

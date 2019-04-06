@@ -3,8 +3,8 @@ import IDrawable from './interface/iDrawable';
 export default class Display {
     private _canvas: HTMLCanvasElement;
     private _context: CanvasRenderingContext2D;
-    private width: number;
-    private height: number;
+    public width: number;
+    public height: number;
 
     private elements: Array<IDrawable>;
 

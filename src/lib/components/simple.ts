@@ -44,9 +44,7 @@ export default class Simple implements IElectronic, IMoveable {
     }
 
     moveTo(position: Vector): void {
-        console.log("Position: " + this.position.toString());
         const delta = position.subtract(this.position);
-        console.log("Delta: " + delta.toString());
         this.move(delta);
     }
 }

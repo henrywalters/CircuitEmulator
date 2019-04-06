@@ -51,6 +51,8 @@ export default class Circuit implements IInputHandler {
 
     private tempWire: Wire = null;
 
+    private mouseOffset: Vector;
+
     constructor(display: Display, input: Input) {
         this.source = null;
         this.input = input;
@@ -81,11 +83,11 @@ export default class Circuit implements IInputHandler {
     onMousedown(input: Input): void {
         if (this.userState === UserStates.None) {
             this.components.forEach(node => {
-                if (IsClickable(node.component)) {
+                if (IsClickable(node.component) && IsDrawable(node.component)) {
                     if (node.component.containsPoint(this.input.mousePos)) {
                         this.selectedNode = node;
                         this.userState = UserStates.Dragging;
-                        console.log(this.selectedNode, this.userState);
+                        this.mouseOffset = this.input.mousePos.subtract(node.component.position);
                     }
                 }
             })
@@ -96,7 +98,6 @@ export default class Circuit implements IInputHandler {
         if (this.userState === UserStates.Dragging) {
             this.userState = UserStates.None;
             this.selectedNode = null;
-            console.log(this.selectedNode, this.userState);
         }
     }
 
@@ -108,8 +109,10 @@ export default class Circuit implements IInputHandler {
         }
 
         if (this.userState === UserStates.Dragging && IsMoveable(this.selectedNode.component)) {
-            console.log("Moving to: " + this.input.mousePos.toString());
-            this.selectedNode.component.moveTo(this.input.mousePos);
+
+            let adjustedMousePos = this.input.mousePos.subtract(this.mouseOffset);
+
+            this.selectedNode.component.moveTo(adjustedMousePos);
             this.selectedNode.inputConnections.forEach(connection => {
                 connection.wire.positionB = connection.inputToNode.component.inputs[connection.inputLeadIndex].position;
             })
@@ -123,8 +126,10 @@ export default class Circuit implements IInputHandler {
         if (this.source !== null) {
             this.breadthFirstTraverse(this.source, (node) => {
                 node.outputConnections.forEach(output => {
-                    output.inputToNode.component.inputs[output.inputLeadIndex].on = node.component.outputs[output.outputLeadIndex].on;
-                    output.inputToNode.component.updateOutput();
+                    if (this.isPartOfLoop(output.inputToNode)) {
+                        output.inputToNode.component.inputs[output.inputLeadIndex].on = node.component.outputs[output.outputLeadIndex].on;
+                        output.inputToNode.component.updateOutput();
+                    }
                 });
             })
         } else {
@@ -135,7 +140,6 @@ export default class Circuit implements IInputHandler {
     inLeadList(lead: Lead, leads: Lead[]): boolean {
         let exists = false;
         leads.forEach(l => {
-            console.log(l.uid, lead.uid);
             if (l.uid === lead.uid) {
                 exists = true;
             }
@@ -193,8 +197,6 @@ export default class Circuit implements IInputHandler {
                 }
             }
         }
-
-        console.log(this.userState);
     }
 
     addComponent(component: IElectronic): string {
@@ -218,9 +220,8 @@ export default class Circuit implements IInputHandler {
 
         if (IsClickConvertable(node.component)) {
             node.component = MakeClickable(node.component, (position: Vector) => {
-                console.log(position.toString());
+
             });
-            console.log(node.component);
         }
 
         let inputIndex = 0;
@@ -267,7 +268,6 @@ export default class Circuit implements IInputHandler {
     }
 
     connect(outputFrom: CircuitNode, outputLeadIndex: number, inputTo: CircuitNode, inputLeadIndex: number): boolean {
-        console.log(outputFrom, inputTo);
         if (outputLeadIndex >= outputFrom.component.outputs.length) {
             console.warn("outputLeadIndex out of bounds");
             return false;
