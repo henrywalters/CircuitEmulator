@@ -3,6 +3,19 @@ import IGeometric, { Shape, geomContainsPoint } from "./interface/IGeometric";
 import IDrawable from "./interface/iDrawable";
 import IClickable from "./interface/iClickable";
 
+export enum LeadStates {
+    Disconnected,
+    Connected,
+    Connecting,
+}
+
+//Match this exactly to lead states in length
+const LeadStateColors: string[] = [
+    "#ffffff",
+    "#0c0cff",
+    "#8e8e8e"
+];
+
 export class Lead implements IDrawable, IGeometric, IClickable {
     private _position: Vector;
     private _on: boolean;
@@ -20,6 +33,8 @@ export class Lead implements IDrawable, IGeometric, IClickable {
     shape: Shape = Shape.Circle;
 
     public uid: string = "";
+
+    public state: LeadStates = LeadStates.Disconnected;
     
     constructor(position: Vector) {
         this._position = position;
@@ -63,6 +78,7 @@ export class Lead implements IDrawable, IGeometric, IClickable {
 
     set connected(state: boolean) {
         this._connected = state;
+        this.state = this._connected ? LeadStates.Connected : LeadStates.Disconnected;
     }
     
     set onHook(callback: () => void) {
@@ -75,8 +91,10 @@ export class Lead implements IDrawable, IGeometric, IClickable {
 
     draw(context: CanvasRenderingContext2D) {
         context.beginPath();
+        context.fillStyle = LeadStateColors[this.state];
         context.arc(this.position.x, this.position.y, this.width / 2, 0, 2 * Math.PI);
         context.stroke();
+        context.fill();
     }
     
     containsPoint(point: Vector): boolean {

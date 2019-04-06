@@ -1,9 +1,10 @@
-import IElectronic from "../interface/iElectronic";
+import IElectronic, { MoveLeadsRelativeToComponent } from "../interface/iElectronic";
 import IGeometric, { Shape } from "../interface/IGeometric";
 import { Lead } from "../lead";
 import Vector from "../vector";
+import { IMoveable } from "../interface/iMoveable";
 
-export default class BinaryMultiplexer implements IElectronic, IGeometric {
+export default class BinaryMultiplexer implements IElectronic, IGeometric, IMoveable {
     width: number = 75;
     height: number = 40;
     shape: Shape = Shape.Rectangle;
@@ -48,5 +49,15 @@ export default class BinaryMultiplexer implements IElectronic, IGeometric {
 
     updateOutput() {
         this.output.on = false;
+    }
+
+    move(delta: Vector): void {
+        this.position.add(delta);
+        MoveLeadsRelativeToComponent(this, delta);
+    }
+
+    moveTo(position: Vector): void {
+        const delta = this.position.subtract(position);
+        this.move(delta);
     }
 }

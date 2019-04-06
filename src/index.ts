@@ -67,9 +67,7 @@ let sampleSize = 50;
 
 circuit.setSource(bNode);
 
-input.mouseDown = _ => {
-    circuit.checkForLeadClicks();
-}
+input.addHandler(circuit);
 
 function loop() {
     let start = window.performance.now();
@@ -77,8 +75,6 @@ function loop() {
     display.clear();
 
     circuit.loop();
-
-    //
 
     display.render();
 

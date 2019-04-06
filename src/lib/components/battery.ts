@@ -2,13 +2,14 @@ import Simple from "./simple";
 import IDrawable from "../interface/iDrawable";
 import Vector from "../vector";
 import IGeometric, { Shape } from "../interface/IGeometric";
+import { IMoveable } from "../interface/iMoveable";
+import { MoveLeadsRelativeToComponent } from "../interface/iElectronic";
 
 export default class Battery extends Simple implements IDrawable, IGeometric {
 
     name: string = "battery";
 
     visible: boolean = true;
-    position: Vector;
 
     width: number = 40;
     height: number = 75;

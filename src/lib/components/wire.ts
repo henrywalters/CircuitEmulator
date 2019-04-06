@@ -35,5 +35,7 @@ export default class Wire extends Simple implements IDrawable {
             context.lineTo(this.position.x + delta.x, this.position.y + delta.y)
             context.stroke();
         }
+
+        context.lineWidth = 1;
     }
 }

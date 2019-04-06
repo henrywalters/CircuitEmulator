@@ -24,3 +24,7 @@ export function geomContainsPoint(geom: IGeometric, geomPos: Vector, pointPos: V
             return delta.magnitude() <= radius;
     }
 }
+
+export function IsGeometric(object: any): object is IGeometric {
+    return 'width' in object && 'height' in object && 'shape' in object;
+}

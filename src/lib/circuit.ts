@@ -4,7 +4,10 @@ import IElectronic from "./interface/iElectronic";
 import Wire from "./components/wire";
 import Display from "./display";
 import Input from "./input";
-import { Lead } from "./lead";
+import { Lead, LeadStates } from "./lead";
+import { IsClickConvertable, MakeClickable, IsClickable } from "./interface/iClickable";
+import IInputHandler from "./interface/iInputHandler";
+import { IsMoveable } from "./interface/iMoveable";
 
 export class CircuitConnection {
     inputToNode: CircuitNode;
@@ -25,9 +28,10 @@ enum UserStates {
     None,
     InputSelected,
     OutputSelected,
+    Dragging,
 }
 
-export default class Circuit  {
+export default class Circuit implements IInputHandler {
 
     display: Display;
     input: Input;
@@ -44,6 +48,8 @@ export default class Circuit  {
 
     private selectedLead: Lead = null;
     private selectedNode: CircuitNode = null;
+
+    private tempWire: Wire = null;
 
     constructor(display: Display, input: Input) {
         this.source = null;
@@ -64,7 +70,7 @@ export default class Circuit  {
         }
     }
 
-    checkForLeadClicks() {
+    onClick(input: Input): void {
         this.leads.forEach(lead => {
             if (lead.containsPoint(this.input.mousePos)) {
                 lead.onClickFn(this.input.mousePos);
@@ -72,7 +78,48 @@ export default class Circuit  {
         })
     }
 
+    onMousedown(input: Input): void {
+        if (this.userState === UserStates.None) {
+            this.components.forEach(node => {
+                if (IsClickable(node.component)) {
+                    if (node.component.containsPoint(this.input.mousePos)) {
+                        this.selectedNode = node;
+                        this.userState = UserStates.Dragging;
+                        console.log(this.selectedNode, this.userState);
+                    }
+                }
+            })
+        }
+    }
+
+    onMouseup(input: Input): void {
+        if (this.userState === UserStates.Dragging) {
+            this.userState = UserStates.None;
+            this.selectedNode = null;
+            console.log(this.selectedNode, this.userState);
+        }
+    }
+
     loop(): void {
+
+        if (this.tempWire !== null) {
+            this.tempWire.positionB = this.input.mousePos;
+            this.tempWire.draw(this.display.context);
+        }
+
+        if (this.userState === UserStates.Dragging && IsMoveable(this.selectedNode.component)) {
+            console.log("Moving to: " + this.input.mousePos.toString());
+            this.selectedNode.component.moveTo(this.input.mousePos);
+            this.selectedNode.inputConnections.forEach(connection => {
+                connection.wire.positionB = connection.inputToNode.component.inputs[connection.inputLeadIndex].position;
+            })
+
+            this.selectedNode.outputConnections.forEach(connection => {
+                connection.wire.position = connection.outputFromNode.component.outputs[connection.outputLeadIndex].position;
+            })
+        } 
+        
+
         if (this.source !== null) {
             this.breadthFirstTraverse(this.source, (node) => {
                 node.outputConnections.forEach(output => {
@@ -101,27 +148,48 @@ export default class Circuit  {
     }
 
     leadClickFn(node: CircuitNode, lead: Lead): void {
-        
         if (this.userState === UserStates.None) {
             if (this.inLeadList(lead, node.component.inputs)) {
                 this.userState = UserStates.InputSelected;
                 this.selectedLead = lead;
+                this.selectedLead.state = LeadStates.Connecting;
+                this.tempWire = new Wire(this.selectedLead.position, this.input.mousePos);
                 this.selectedNode = node;
             } else if (this.inLeadList(lead, node.component.outputs)) {
                 this.userState = UserStates.OutputSelected
                 this.selectedLead = lead;
+                this.selectedLead.state = LeadStates.Connecting;
+                this.tempWire = new Wire(this.selectedLead.position, this.input.mousePos);
                 this.selectedNode = node;
             } else {
                 this.userState = UserStates.None;
+                this.tempWire = null;
                 console.warn("Didnt match a lead up");
             }
-        } if (this.userState === UserStates.OutputSelected) {
+        } else if (this.userState === UserStates.OutputSelected) {
             if (this.inLeadList(lead, node.component.inputs)) {
                 if (!lead.connected) {
                     this.connect(this.selectedNode, this.leadIndex(this.selectedLead), node, this.leadIndex(lead));
                     this.userState = UserStates.None;
                     this.selectedLead = null;
                     this.selectedNode = null;
+                    this.tempWire = null;
+                } else {
+                    this.userState = UserStates.None;
+                    this.tempWire = null;
+                }
+            }
+        } else if (this.userState === UserStates.InputSelected) {
+            if (this.inLeadList(lead, node.component.outputs)) {
+                if (!lead.connected) {
+                    this.connect(node, this.leadIndex(lead), this.selectedNode, this.leadIndex(this.selectedLead));
+                    this.userState = UserStates.None;
+                    this.selectedLead = null;
+                    this.selectedNode = null;
+                    this.tempWire = null;
+                } else {
+                    this.userState = UserStates.None;
+                    this.tempWire = null;
                 }
             }
         }
@@ -146,6 +214,13 @@ export default class Circuit  {
 
         if (IsDrawable(node.component)) {
             this.display.addElement(node.component);
+        }
+
+        if (IsClickConvertable(node.component)) {
+            node.component = MakeClickable(node.component, (position: Vector) => {
+                console.log(position.toString());
+            });
+            console.log(node.component);
         }
 
         let inputIndex = 0;

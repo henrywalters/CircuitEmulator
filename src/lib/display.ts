@@ -1,8 +1,8 @@
 import IDrawable from './interface/iDrawable';
 
 export default class Display {
-    private canvas: HTMLCanvasElement;
-    private context: CanvasRenderingContext2D;
+    private _canvas: HTMLCanvasElement;
+    private _context: CanvasRenderingContext2D;
     private width: number;
     private height: number;
 
@@ -11,16 +11,16 @@ export default class Display {
     constructor(container: HTMLElement, width: number, height: number) {
         this.width = width;
         this.height = height;
-        this.canvas = document.createElement("canvas");
-        this.canvas.id = "circuit-emulator";
-        this.canvas.width = width;
-        this.canvas.height = height;
+        this._canvas = document.createElement("canvas");
+        this._canvas.id = "circuit-emulator";
+        this._canvas.width = width;
+        this._canvas.height = height;
 
-        this.context = this.canvas.getContext("2d");
+        this._context = this._canvas.getContext("2d");
 
         this.elements = [];
 
-        container.appendChild(this.canvas);
+        container.appendChild(this._canvas);
     }
 
     addElement(element: IDrawable): void {
@@ -32,16 +32,20 @@ export default class Display {
     }
 
     clear() {
-        this.context.clearRect(0, 0, this.width, this.height);
+        this._context.clearRect(0, 0, this.width, this.height);
     }
 
     render() {
         this.elements.forEach(element => {
             if (element.visible) {
-                this.context.save();
-                element.draw(this.context);
-                this.context.restore();
+                this._context.save();
+                element.draw(this._context);
+                this._context.restore();
             }
         })
+    }
+
+    get context(): CanvasRenderingContext2D {
+        return this._context;
     }
 }

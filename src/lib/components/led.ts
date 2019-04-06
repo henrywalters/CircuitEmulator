@@ -1,7 +1,10 @@
 import Simple from "./simple";
 import IDrawable from "../interface/iDrawable";
 import Vector from "../vector";
-import IGeometric, { Shape } from "../interface/IGeometric";
+import IGeometric, { Shape, geomContainsPoint } from "../interface/IGeometric";
+import IClickable from "../interface/iClickable";
+import { IMoveable } from "../interface/iMoveable";
+import { MoveLeadsRelativeToComponent } from "../interface/iElectronic";
 
 export default class LED extends Simple implements IDrawable, IGeometric {
     visible: boolean = true;
@@ -10,8 +13,6 @@ export default class LED extends Simple implements IDrawable, IGeometric {
     shape: Shape = Shape.Circle;
 
     name: string = "LED";
-
-    position: Vector;
 
     color: string;
 

@@ -1,7 +1,9 @@
-import IElectronic from "../interface/iElectronic";
+import IElectronic, { MoveLeadsRelativeToComponent } from "../interface/iElectronic";
 import { Lead } from "../lead";
+import { IMoveable } from "../interface/iMoveable";
+import Vector from "../vector";
 
-export default class BaseComponent implements IElectronic {
+export default class BaseComponent implements IElectronic, IMoveable {
     name: string = "BaseComponent";
     uid: string = "";
     inputs: Array<Lead>;
@@ -9,6 +11,8 @@ export default class BaseComponent implements IElectronic {
 
     inputCount: number = 0;
     outputCount: number = 0;
+
+    position: Vector;
 
     constructor() {
         this.inputs = [];
@@ -50,4 +54,14 @@ export default class BaseComponent implements IElectronic {
     }
 
     updateOutput(): void {}
+
+    move(delta: Vector): void {
+        this.position = this.position.add(delta);
+        MoveLeadsRelativeToComponent(this, delta);
+    }
+
+    moveTo(position: Vector): void {
+        const delta = position.subtract(this.position);
+        this.move(delta);
+    }
 }

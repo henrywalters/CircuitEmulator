@@ -2,11 +2,11 @@ import BaseComponent from "./base";
 import { Lead } from "../lead";
 import IDrawable from "../interface/iDrawable";
 import Vector from "../vector";
-import IGeometric, { Shape } from "../interface/IGeometric";
+import IGeometric, { Shape, geomContainsPoint } from "../interface/IGeometric";
+import { MoveLeadsRelativeToComponent } from "../interface/iElectronic";
 
 export default class Demultiplexer extends BaseComponent implements IDrawable, IGeometric {
     visible: boolean = true;
-    position: Vector;
     width: number;
     height: number;
     shape: Shape = Shape.Rectangle;
@@ -33,5 +33,4 @@ export default class Demultiplexer extends BaseComponent implements IDrawable, I
             output.on = this.input(0).on;
         })
     }
-
 }
