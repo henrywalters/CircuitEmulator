@@ -2,13 +2,16 @@ import Display from './lib/display';
 import Input from './lib/input';
 import LED from './lib/components/led';
 import Vector from './lib/vector';
-import Wire from './lib/components/wire';
+import Wire, { WireDrawModes } from './lib/components/wire';
 import Circuit from './lib/circuit';
 import Battery from './lib/components/battery';
 import Demultiplexer from './lib/components/demultiplexer';
 import Label from './lib/components/label';
 import Multiplexer from './lib/components/multiplexer';
 import And from './lib/components/gates/and';
+import Nand from './lib/components/gates/nand';
+import Or from './lib/components/gates/or';
+import { Switch } from './lib/components/switch';
 
 const app = document.getElementById("app");
 
@@ -42,9 +45,19 @@ circuit.addComponent(led4);
 circuit.addComponent(led5);
 circuit.addComponent(led6);
 
+circuit.addComponent(new Switch(new Vector(500, 500)));
+circuit.addComponent(new Switch(new Vector(500, 500)));
+
+circuit.addComponent(new Switch(new Vector(500, 500)));
+
+circuit.addComponent(new Switch(new Vector(500, 500)));
+
+
 circuit.addComponent(new And(new Vector(100, 100)));
 circuit.addComponent(new And(new Vector(100, 100)));
 circuit.addComponent(new And(new Vector(100, 100)));
+circuit.addComponent(new Nand(new Vector(200, 200)));
+circuit.addComponent(new Or(new Vector(300, 300)));
 
 let bNode = circuit.getNode(battery.uid);
 
@@ -60,6 +73,15 @@ let mNode = circuit.getNode(mux.uid);
 circuit.connectSimple(mNode, bNode);
 
 circuit.connectSimple(bNode, dNode);
+
+bNode.outputConnections.forEach(connection => {
+    connection.wire.drawMode = WireDrawModes.HorizontalFirst;
+})
+
+bNode.inputConnections.forEach(connection => {
+    connection.wire.drawMode = WireDrawModes.VerticalFirst;
+})
+
 
 //circuit.connect(dNode, 0, node4, 0);
 //circuit.connect(dNode, 1, node5, 0);

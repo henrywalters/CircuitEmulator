@@ -8,6 +8,7 @@ import { Lead, LeadStates } from "./lead";
 import { IsClickConvertable, MakeClickable, IsClickable } from "./interface/iClickable";
 import IInputHandler from "./interface/iInputHandler";
 import { IsMoveable } from "./interface/iMoveable";
+import { Switch, IsSwitch } from "./components/switch";
 
 export class CircuitConnection {
     inputToNode: CircuitNode;
@@ -78,6 +79,15 @@ export default class Circuit implements IInputHandler {
                 lead.onClickFn(this.input.mousePos);
             }
         })
+
+        this.components.forEach(component => {
+            if (IsSwitch(component.component)) {
+                console.log(component.component);
+                if (component.component.isPointInSwitch(this.input.mousePos)) {
+                    component.component.toggle();
+                }
+            }
+        });
     }
 
     onMousedown(input: Input): void {

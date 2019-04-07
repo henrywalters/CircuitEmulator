@@ -6,7 +6,7 @@ import { IMoveable } from "../interface/iMoveable";
 export default class Simple implements IElectronic, IMoveable {
     inputs: Array<Lead>;
     outputs: Array<Lead>;
-    name: string = "electronic_component";
+    name: string = "component";
     uid: string = "";
 
     position: Vector;
