@@ -12,6 +12,7 @@ import And from './lib/components/gates/and';
 import Nand from './lib/components/gates/nand';
 import Or from './lib/components/gates/or';
 import { Switch } from './lib/components/switch';
+import Nor from './lib/components/gates/nor';
 
 const app = document.getElementById("app");
 
@@ -45,6 +46,9 @@ circuit.addComponent(led4);
 circuit.addComponent(led5);
 circuit.addComponent(led6);
 
+circuit.addComponent(new Demultiplexer(20, 70, new Vector(500, 500), 2));
+circuit.addComponent(new Demultiplexer(20, 70, new Vector(500, 520), 2));
+
 circuit.addComponent(new Switch(new Vector(500, 500)));
 circuit.addComponent(new Switch(new Vector(500, 500)));
 
@@ -57,7 +61,9 @@ circuit.addComponent(new And(new Vector(100, 100)));
 circuit.addComponent(new And(new Vector(100, 100)));
 circuit.addComponent(new And(new Vector(100, 100)));
 circuit.addComponent(new Nand(new Vector(200, 200)));
-circuit.addComponent(new Or(new Vector(300, 300)));
+//circuit.addComponent(new Or(new Vector(300, 300)));
+circuit.addComponent(new Nor(new Vector(350, 350)));
+circuit.addComponent(new Nor(new Vector(350, 400)));
 
 let bNode = circuit.getNode(battery.uid);
 
