@@ -17,7 +17,7 @@ export default class Wire extends Simple implements IDrawable {
     position: Vector;
     public positionB: Vector;
 
-    public drawMode: WireDrawModes = WireDrawModes.MiddleSplitHorizontalFirst;
+    public drawMode: WireDrawModes = WireDrawModes.VerticalFirst;
 
     constructor(positionA: Vector, positionB: Vector) {
         super();

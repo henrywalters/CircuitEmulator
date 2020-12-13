@@ -8,13 +8,19 @@ export default class Display {
 
     private elements: Array<IDrawable>;
 
-    constructor(container: HTMLElement, width: number, height: number) {
-        this.width = width;
-        this.height = height;
+    constructor(container: HTMLElement) {
+        const rawBWidth = container.style.borderWidth;
+        const bWidth = (typeof rawBWidth === 'number' ? 
+            container.style.borderWidth : (typeof rawBWidth === 'string' ? 
+                rawBWidth.slice(0, rawBWidth.length - 2) : 0));
+        console.log(bWidth, container.style.borderWidth);
+        this.width = container.offsetWidth - 4 - 2 * (typeof bWidth === 'number' ? bWidth : 0);
+        this.height = container.offsetHeight - 4 - 2 * (typeof bWidth === 'number' ? bWidth : 0);
+        console.log(container.offsetWidth, )
         this._canvas = document.createElement("canvas");
         this._canvas.id = "circuit-emulator";
-        this._canvas.width = width;
-        this._canvas.height = height;
+        this._canvas.width = this.width;
+        this._canvas.height = this.height;
 
         this._context = this._canvas.getContext("2d");
 

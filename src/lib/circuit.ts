@@ -111,6 +111,16 @@ export default class Circuit implements IInputHandler {
         }
     }
 
+    onRightClick(input: Input): void {
+        this.leads.forEach(lead => {
+            if (lead.containsPoint(this.input.mousePos)) {
+                console.log(lead);
+                //lead.onRightClickFn(this.input.mousePos);
+            }
+        })
+        this.clearSelection();
+    }
+
     loop(): void {
 
         if (this.tempWire !== null) {
@@ -159,6 +169,14 @@ export default class Circuit implements IInputHandler {
 
     leadIndex(lead: Lead): number {
         return lead.uid.split("_")[3] as unknown as number;
+    }
+
+    clearSelection() {
+        this.userState = UserStates.None;
+        this.tempWire = null;
+        if (this.selectedLead) this.selectedLead.state = this.selectedLead.previousState;
+        this.selectedLead = null;
+        this.selectedNode = null;
     }
 
     leadClickFn(node: CircuitNode, lead: Lead): void {

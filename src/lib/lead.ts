@@ -26,6 +26,9 @@ export class Lead implements IDrawable, IGeometric, IClickable {
     private _onHook: () => void;
     private _offHook: () => void;
 
+    private _previousState: LeadStates = LeadStates.Connecting;
+    private _state: LeadStates = LeadStates.Disconnected;
+
     onClickFn: (mousePos: Vector) => void;
 
     visible: boolean = true;
@@ -36,7 +39,7 @@ export class Lead implements IDrawable, IGeometric, IClickable {
 
     public uid: string = "";
 
-    public state: LeadStates = LeadStates.Disconnected;
+    
     
     constructor(position: Vector) {
         this._position = position;
@@ -72,6 +75,19 @@ export class Lead implements IDrawable, IGeometric, IClickable {
                 this._on = false;
             }
         }
+    }
+
+    get state() {
+        return this._state;
+    }
+
+    set state(state: LeadStates) {
+        this._previousState = this._state;
+        this._state = state;
+    }
+
+    get previousState() {
+        return this._previousState;
     }
 
     get connected(): boolean {

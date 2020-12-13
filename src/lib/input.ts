@@ -7,6 +7,7 @@ export default class Input {
     mouseUp: (event: MouseEvent) => void;
     mouseDown: (event: MouseEvent) => void;
     click: (event: MouseEvent) => void;
+    rightClick: (event: MouseEvent) => void;
 
     private handlers: IInputHandler[] = [];
 
@@ -15,6 +16,13 @@ export default class Input {
             handler.onClick(this);
         })
         this.click(event);
+    }
+
+    private rightClickEvent(event: MouseEvent): void {
+        this.handlers.forEach(handler => {
+            handler.onRightClick(this);
+        })
+        this.rightClick(event);
     }
 
     private mouseUpEvent(event: MouseEvent): void {
@@ -48,10 +56,16 @@ export default class Input {
             this.mouseUp = () => {};
             this.mouseDown = () => {};
             this.click = () => {};
+            this.rightClick = () => {};
 
             canvas.addEventListener("click", event => this.clickEvent(event));
+            canvas.addEventListener("contextmenu", event => {
+                event.preventDefault();
+                this.rightClickEvent(event);
+            });
             canvas.addEventListener("mouseup", event => this.mouseUpEvent(event));
             canvas.addEventListener("mousedown", event => this.mouseDownEvent(event));
+            
         } else {
             throw new Error("circuit-emulator canvas element does not exist");
         }

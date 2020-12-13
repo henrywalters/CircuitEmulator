@@ -14,6 +14,30 @@ import Or from './lib/components/gates/or';
 import { Switch } from './lib/components/switch';
 import Nor from './lib/components/gates/nor';
 
+const CE = {
+    Display,
+    Input,
+    Circuit,
+    Vector,
+
+    Wire,
+    WireDrawModes,
+    LED,
+    Battery,
+    Demultiplexer,
+    Label,
+    Multiplexer,
+    And,
+    Nand,
+    Or,
+    Switch,
+    Nor,
+}
+
+window['CE'] = CE;
+
+export default CE;
+/*
 const app = document.getElementById("app");
 
 const display = new Display(app, window.innerWidth, window.innerHeight);
@@ -134,3 +158,4 @@ function loop() {
 }
     
 loop();
+*/
